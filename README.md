@@ -1,4 +1,4 @@
-OCS must-gather
+ODF must-gather
 =================
 
 `odf-must-gather` is a tool built on top of [OpenShift must-gather](https://github.com/openshift/must-gather)
@@ -59,5 +59,5 @@ Developers must follow these steps to make a change:
 
 #### Commit and Pull Request Messages
 
-- Refer and Follow same standards mention in [OCS-Operator How to Contribute](./CONTRIBUTING.md)
+- Refer and Follow same standards mention in [ODF-MUST-GATHER How to Contribute](./CONTRIBUTING.md)
 - Tag the Pull Request with `must-gather`
