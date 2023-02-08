@@ -1,4 +1,21 @@
-reviewers:
-  - yati1998
+# approval == this is a good idea /approve
 approvers:
-  - yati1998
+  - jarrpa
+  - obnoxxx
+  - umangachapagain
+  - agarwal-mudit
+  - nbalacha
+  - BlaineEXE
+  - nb-ohad
+  - iamniting
+# review == this code is good /lgtm
+reviewers:
+  - jarrpa
+  - obnoxxx
+  - umangachapagain
+  - agarwal-mudit
+  - nbalacha
+  - BlaineEXE
+  - nb-ohad
+  - iamniting
+  
