@@ -8,10 +8,11 @@ MUST_GATHER_IMAGE_NAME ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(MUST_GATHER_
 OCS_MUST_GATHER_DIR ?= "${OCS_MUST_GATHER_DIR:-ocs-must-gather}"
 OCP_MUST_GATHER_DIR ?= "${OCP_MUST_GATHER_DIR:-ocp-must-gather}"
 
+PLATFORM ?= "docker"
 
 .PHONY: \
 	odf-must-gather 
 	
 odf-must-gather:
 	@echo "Building the ocs-must-gather image"
-	docker build -f must-gather/Dockerfile -t ${MUST_GATHER_IMAGE_NAME} must-gather/
+	${PLATFORM} build -f must-gather/Dockerfile -t ${MUST_GATHER_IMAGE_NAME} must-gather/
