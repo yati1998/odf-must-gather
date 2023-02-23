@@ -391,9 +391,10 @@ for ns in $namespaces; do
         oc rsync -n "${ns}" "$(oc get pods -n "${ns}"| grep "${node//./}-debug"| awk '{print $1}')":/host/var/lib/rook/openshift-storage/log "${VOLUME_OUTPUT_DIR}"
     }
 
-    crash_collection(){
+    crash_core_collection(){
         printf "collecting crash core dump from node %s \n" "${node}" | tee -a  "${BASE_COLLECTION_PATH}"/gather-debug.log
         oc rsync -n "${ns}" "$(oc get pods -n "${ns}" -l "${node//./}"-debug='ready' --no-headers | awk '{print $1}')":/host/var/lib/rook/openshift-storage/crash/ "${CRASH_OUTPUT_DIR}"
+        oc rsync -n "${ns}" "$(oc get pods -n "${ns}" -l "${node//./}"-debug='ready' --no-headers | awk '{print $1}')":/host/var/lib/systemd/coredump/ "${COREDUMP_OUTPUT_DIR}"
     }
 
     journal_collection(){
@@ -420,10 +421,12 @@ CMDS
         VOLUME_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/volume_collection_${node}
         JOURNAL_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/journal_${node}
         KERNEL_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/kernel_${node}
+        COREDUMP_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/coredump_${node}
         mkdir -p "${CRASH_OUTPUT_DIR}"
         mkdir -p "${VOLUME_OUTPUT_DIR}"
         mkdir -p "${JOURNAL_OUTPUT_DIR}"
         mkdir -p "${KERNEL_OUTPUT_DIR}"
+        mkdir -p "${COREDUMP_OUTPUT_DIR}"
         volume_collection &
         pids_log+=($!)
         crash_collection &
