@@ -11,7 +11,6 @@ fi
 SINCE_TIME=$2
 
 # Make a globle variable for namespace
-INSTALL_NAMESPACE=openshift-storage
 RAMEN_NAMESPACE=openshift-dr-system
 
 # Add general resources to list if necessary
@@ -67,12 +66,14 @@ oc_yamls+=("hpa")
 oc_yamls+=("subscription")
 oc_yamls+=("installplan")
 
-echo "collecting dump of namespace" | tee -a  "${BASE_COLLECTION_PATH}"/gather-debug.log
+echo "collecting existing namespaces" | tee -a "${BASE_COLLECTION_PATH}"/gather-debug.log
+INSTALL_NAMESPACE=$(oc get storagecluster -A --no-headers | awk '{print $1}')
+echo "collecting dump of namespace ${INSTALL_NAMESPACE}" | tee -a  "${BASE_COLLECTION_PATH}"/gather-debug.log
 oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect ns/"${INSTALL_NAMESPACE}" --"${SINCE_TIME}" >> "${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
 echo "collecting dump of clusterresourceversion" | tee -a  "${BASE_COLLECTION_PATH}"/gather-debug.log
 for oc_yaml in "${oc_yamls[@]}"; do
-   # shellcheck disable=SC2129
-   oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect "${oc_yaml}" -n "${INSTALL_NAMESPACE}" --"${SINCE_TIME}" >> "${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
+     # shellcheck disable=SC2129
+     oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect "${oc_yaml}" -n "${INSTALL_NAMESPACE}" --"${SINCE_TIME}" >> "${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
 done
 
 # Create the dir for oc_output
@@ -95,9 +96,9 @@ for command_desc in "${commands_desc[@]}"; do
 done
 
 # NOTE: This is a temporary fix for collecting the storagecluster as we are not able to collect the storagecluster using the inspect command
-{ oc get storageclusters -n ${INSTALL_NAMESPACE} -o yaml; } > "$BASE_COLLECTION_PATH/namespaces/${INSTALL_NAMESPACE}/oc_output/storagecluster.yaml" 2>&1
-{ oc get storagesystem -n ${INSTALL_NAMESPACE} -o yaml; } > "$BASE_COLLECTION_PATH/namespaces/${INSTALL_NAMESPACE}/oc_output/storagesystem.yaml" 2>&1
-{ oc get storageconsumer -n ${INSTALL_NAMESPACE} -o yaml; } > "$BASE_COLLECTION_PATH/namespaces/${INSTALL_NAMESPACE}/oc_output/storageconsumer.yaml" 2>&1
+{ oc get storageclusters -n "${INSTALL_NAMESPACE}" -o yaml; } > "$BASE_COLLECTION_PATH/namespaces/${INSTALL_NAMESPACE}/oc_output/storagecluster.yaml" 2>&1
+{ oc get storagesystem -n "${INSTALL_NAMESPACE}" -o yaml; } > "$BASE_COLLECTION_PATH/namespaces/${INSTALL_NAMESPACE}/oc_output/storagesystem.yaml" 2>&1
+{ oc get storageconsumer -n "${INSTALL_NAMESPACE}" -o yaml; } > "$BASE_COLLECTION_PATH/namespaces/${INSTALL_NAMESPACE}/oc_output/storageconsumer.yaml" 2>&1
 
 # Create the dir for data from all namespaces
 mkdir -p "${BASE_COLLECTION_PATH}/namespaces/all/"
