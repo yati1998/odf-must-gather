@@ -1,8 +1,7 @@
 ## How to Contribute
 
-The ODF_MUST_GATHER project is under the [Apache 2.0 license](LICENSE). We accept
-contributions via GitHub pull requests. This document outlines how to
-contribute to the project.
+The odf-must-gather project accept contributions via GitHub pull requests.
+This document outlines how to contribute to the project.
 
 ## Contribution Flow
 
@@ -10,7 +9,7 @@ Developers must follow these steps to make a change:
 
 1. Fork the `red-hat-storage/odf-must-gather` repository on GitHub.
 2. Create a branch from the master branch, or from a versioned branch (such
-   as `release-4.2`) if you are proposing a backport.
+   as `release-4.13`) if you are proposing a backport.
 3. Make changes.
 4. Create tests as needed and ensure that all tests pass.
 5. Ensure your commit messages include sign-off.
@@ -19,27 +18,13 @@ Developers must follow these steps to make a change:
 8. Work with the community to make any necessary changes through the code
    review process (effectively repeating steps 3-8 as needed).
 
-## Developer Environment Installation
-
-Instructions to create a dev environment for OCS-operator can be found in the
-[main project documentation](./README.md#installation-of-development-builds).
-
 ## Commit Requirements
 
-In addition to passing [functional tests](./README.md#functional-tests), all
-commits to OCS-operator must follow the guidelines in this section. You can
-verify your changes meet most of these standards by running the following
-command in the repository's root directory:
-
-```
-make ocs-operator-ci
-```
+All commits to odf-must-gather must follow the guidelines in this section.
 
 ### Commits Per Pull Request
 
-*This requirement cannot be tested by make ocs-operator-ci.*
-
-OCS-operator is a project which maintains several versioned branches
+odf-must-gather is a project which maintains several versioned branches
 independently. When backports are necessary, monolithic commits make it
 difficult for maintainers to cleanly backport only the necessary changes.
 
@@ -58,15 +43,9 @@ into their own commits are:
 
 Even when breaking down commits, each commit should leave the codebase in a
 working state. The code should add necessary unit tests and pass unit tests,
-formatting tests, and usually functional tests. There can be times when
-exceptions to these requirements are appropriate (for instance, it is sometimes
-useful for maintainability to split code changes and related changes to CRDs
-and CSVs). Unless you are very sure this is true for your change, though, make
-sure each commit passes CI checks as above.
+formatting tests, and usually functional tests.
 
 ### Commit and Pull Request Messages
-
-*This requirement cannot be fully tested by make ocs-operator-ci.*
 
 - The message must begin with a single summary line describing the change.
   - It must be capitalized.
@@ -80,7 +59,7 @@ sure each commit passes CI checks as above.
     the summary.
   - It must describe why the change is necessary or useful.
   - It must describe how the change was implemented.
-  - It must reference any open Issues the change addresses.
+  - It must reference any open issues the change addresses.
   - It must wrap at 80 characters.
   - *For very small changes it may be acceptable to omit the longer description.
     Please remember, that it is easy for any developer to believe their code is
@@ -98,37 +77,11 @@ sure each commit passes CI checks as above.
 Pull request messages should follow the same format, but for the entire set of
 changes contained in the pull request.
 
-### Coding Style
-
-All changes must follow style guidelines tested by the `golangci/golangci-lint`
-project. You can verify that your code meets these standards specifically by
-running:
-
-```
-make golangci-lint
-```
-
-### Unit tests
-
-Changes should be covered by unit tests and all unit tests must pass. These
-can be run directly by running:
-
-```
-make unit-test
-``` 
-
-*It is of special note that many of the mock objects in the [StorageCluster
-tests](./pkg/controller/storagecluster/storagecluster_controller_test.go) are
-reused in many other test cases. Please avoid using the global mock variables directly, instead use the mock variables by creating DeepCopy() to prevent modification of global mock variables. They may be useful in developing your own.*
-
 ### Certificate of Origin
-
-*This requirement is not currently tested by `make ocs-operator-ci`.*
 
 All commit messages must contain a sign-off indicating that the contributor
 asserts that they have the legal right to make the contribution and agrees
-that the contribution will be a matter of public record. See [DCO](./DCO) for
-legal details. An example of this sign-off is:
+that the contribution will be a matter of public record.
 
 ```
 A description of my change
