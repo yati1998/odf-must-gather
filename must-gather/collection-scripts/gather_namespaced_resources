@@ -187,6 +187,14 @@ if [ "$(oc get storageclassclaim --no-headers -A | awk '{print $2}')" != "" ] ; 
      { oc get storageclassclaim -oyaml --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_storageclassclaim_all_ns"
 fi
 
+# Collect details of managedfusionoffering of all namespaces for managed services
+echo "collecting dump of oc get managedfusionoffering all namespaces" | tee -a  "${BASE_COLLECTION_PATH}/gather-debug.log"
+if [ "$(oc get managedfusionoffering --no-headers -A | awk '{print $1}')" != "" ] ; then
+     { oc get managedfusionoffering --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/get_managedfusionoffering_all_ns"
+     { oc describe managedfusionoffering --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/desc_managedfusionoffering_all_ns"
+     { oc get managedfusionoffering -oyaml --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_managedfusionoffering_all_ns"
+fi
+
 # Collect csi-addons object details of all namespaces
 echo "collecting dump of oc get csiaddonsnode all namespaces" | tee -a  "${BASE_COLLECTION_PATH}/gather-debug.log"
 if [ "$(oc get csiaddonsnode --no-headers -A | awk '{print $2}')" != "" ] ; then
