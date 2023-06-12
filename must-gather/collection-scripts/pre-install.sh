@@ -1,6 +1,10 @@
 #!/bin/bash
 
+# Expect base collection path as an argument
 BASE_COLLECTION_PATH="${1}"
+
+# Source the utils
+. utils.sh
 
 ns=$(oc get deploy --all-namespaces -o go-template --template='{{range .items}}{{if .metadata.labels}}{{printf "%s %v" .metadata.namespace (index .metadata.labels "olm.owner")}} {{printf "\n"}}{{end}}{{end}}' | grep ocs-operator | awk '{print $1}' | uniq)
 
