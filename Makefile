@@ -1,18 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+
+source hack/docker-common.sh
+
 IMAGE_REGISTRY ?= "quay.io"
-REGISTRY_NAMESPACE ?= "ocs-dev"
-IMAGE_TAG ?= "latest"
-MUST_GATHER_IMAGE_NAME ?= "ocs-must-gather"
+REGISTRY_NAMESPACE ?= "rhceph-dev"
+IMAGE_TAG ?= "latest-4.14"
+MUST_GATHER_IMAGE_NAME ?= "odf4-odf-must-gather-rhel9"
 
-MUST_GATHER_IMAGE_NAME ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(MUST_GATHER_IMAGE_NAME):$(IMAGE_TAG)
+MUST_GATHER_FULL_IMAGE_NAME ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(MUST_GATHER_IMAGE_NAME):$(IMAGE_TAG)
 
-OCS_MUST_GATHER_DIR ?= "${OCS_MUST_GATHER_DIR:-ocs-must-gather}"
+ODF_MUST_GATHER_DIR ?= "${ODF_MUST_GATHER_DIR:-odf-must-gather}"
 OCP_MUST_GATHER_DIR ?= "${OCP_MUST_GATHER_DIR:-ocp-must-gather}"
-
-PLATFORM ?= "docker"
 
 .PHONY: \
 	odf-must-gather 
 	
 odf-must-gather:
-	@echo "Building the ocs-must-gather image"
-	${PLATFORM} build -f must-gather/Dockerfile -t ${MUST_GATHER_IMAGE_NAME} must-gather/
+	@echo "Building the odf-must-gather image"
+	${IMAGE_BUILD_CMD} build -f must-gather/Dockerfile -t "${MUST_GATHER_FULL_IMAGE_NAME}" must-gather/
