@@ -23,6 +23,7 @@ dbglogf() {
 
     if [[ -z $1 || -z $msg ]]; then
         echo "dbglogf: Not enough args to call the function."
+        exit 1
     fi
 
     echo -e "${msg}" | tee -a "${1}"
