@@ -10,6 +10,9 @@ fi
 # Expect time option as an argument
 SINCE_TIME=$2
 
+# Source the utils
+. utils.sh
+
 # Make a global variable for namespace
 INSTALL_NAMESPACES=$(oc get storagecluster -A --no-headers | awk '{print $1}')
 PRODUCT_NAMESPACE=$(oc get managedFusionOffering -A --no-headers | awk '{print $1}')
@@ -86,12 +89,12 @@ oc_yamls+=("prometheus")
 oc_yamls+=("alertmanagerconfig")
 
 for INSTALL_NAMESPACE in $PRODUCT_NAMESPACE $INSTALL_NAMESPACES $MANAGED_FUSION_NAMESPACE $OPERATOR_NAMESPACE; do
-     echo "collecting dump of namespace ${INSTALL_NAMESPACE}" | tee -a "${BASE_COLLECTION_PATH}"/gather-debug.log
-     oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect ns/"${INSTALL_NAMESPACE}" --"${SINCE_TIME}" >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
-     echo "collecting dump of clusterresourceversion" | tee -a "${BASE_COLLECTION_PATH}"/gather-debug.log
+     dbglog "collecting dump of namespace ${INSTALL_NAMESPACE}"
+     { oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect ns/"${INSTALL_NAMESPACE}" --"${SINCE_TIME}" 2>&1; } | dbglog
+     dbglog "collecting dump of clusterresourceversion"
      for oc_yaml in "${oc_yamls[@]}"; do
           # shellcheck disable=SC2129
-          oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect "${oc_yaml}" -n "${INSTALL_NAMESPACE}" --"${SINCE_TIME}" >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
+          { oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect "${oc_yaml}" -n "${INSTALL_NAMESPACE}" --"${SINCE_TIME}" 2>&1; } | dbglog
      done
 
      # Create the dir for oc_output
@@ -99,7 +102,7 @@ for INSTALL_NAMESPACE in $PRODUCT_NAMESPACE $INSTALL_NAMESPACES $MANAGED_FUSION_
 
      # Run the Collection of Resources to list
      for command_get in "${commands_get[@]}"; do
-          echo "collecting oc command ${command_get}" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+          dbglog "collecting oc command ${command_get}"
           COMMAND_OUTPUT_FILE=${BASE_COLLECTION_PATH}/namespaces/${INSTALL_NAMESPACE}/oc_output/${command_get// /_}
           # shellcheck disable=SC2086
           { oc get ${command_get} -n ${INSTALL_NAMESPACE}; } >>"${COMMAND_OUTPUT_FILE}"
@@ -107,7 +110,7 @@ for INSTALL_NAMESPACE in $PRODUCT_NAMESPACE $INSTALL_NAMESPACES $MANAGED_FUSION_
 
      # Run the Collection of OC desc commands
      for command_desc in "${commands_desc[@]}"; do
-          echo "collecting oc describe command ${command_desc}" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+          dbglog "collecting oc describe command ${command_desc}"
           COMMAND_OUTPUT_FILE=${BASE_COLLECTION_PATH}/namespaces/${INSTALL_NAMESPACE}/oc_output/${command_desc// /_}
           # shellcheck disable=SC2086
           { oc describe ${command_desc} -n ${INSTALL_NAMESPACE}; } >>"${COMMAND_OUTPUT_FILE}"
@@ -124,28 +127,28 @@ mkdir -p "${BASE_COLLECTION_PATH}/namespaces/all/"
 
 # Run the Collection of Resources using must-gather
 for resource in "${resources[@]}"; do
-     echo "collecting dump of ${resource}" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
-     { oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect "${resource}" --all-namespaces --"${SINCE_TIME}"; } >>"${BASE_COLLECTION_PATH}/gather-debug.log" 2>&1
+     dbglog "collecting dump of ${resource}"
+     { oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect "${resource}" --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 done
 
 { timeout 60 oc get ns openshift-dr-system; }
 # Verify if openshift-dr-system namespace exists
 if [ $? == 0 ]; then
-     echo "collecting dump of openshift-dr-system namespace" | tee -a "${BASE_COLLECTION_PATH}"/gather-debug.log
-     oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect ns/"${RAMEN_NAMESPACE}" --"${SINCE_TIME}" >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
+     dbglog "collecting dump of openshift-dr-system namespace"
+     { oc adm --dest-dir="${BASE_COLLECTION_PATH}" inspect ns/"${RAMEN_NAMESPACE}" --"${SINCE_TIME}" 2>&1; } | dbglog
 
      # Create the dir for oc_output for openshift-dr-system namespace
      mkdir -p "${BASE_COLLECTION_PATH}/namespaces/${RAMEN_NAMESPACE}/oc_output/"
 
      # Run the Collection of Resources to list
      for dr_resource in "${dr_resources[@]}"; do
-          echo "collecting oc command ${dr-resource}" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+          dbglog "collecting oc command ${dr-resource}"
           COMMAND_OUTPUT_FILE=${BASE_COLLECTION_PATH}/namespaces/${RAMEN_NAMESPACE}/oc_output/${dr_resource// /_}
           # shellcheck disable=SC2086
           { oc get ${dr_resource} -n ${RAMEN_NAMESPACE}; } >>"${COMMAND_OUTPUT_FILE}"
      done
      # Run collection of oc describe command for config map
-     echo "collecting oc describe configmap -n ${RAMEN_NAMESPACE}" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+     dbglog "collecting oc describe configmap -n ${RAMEN_NAMESPACE}"
      COMMAND_OUTPUT_FILE=${BASE_COLLECTION_PATH}/namespaces/${RAMEN_NAMESPACE}/oc_output/desc_configmap
      # shellcheck disable=SC2086
      { oc describe configmap -n ${RAMEN_NAMESPACE}; } >>"${COMMAND_OUTPUT_FILE}"
@@ -154,33 +157,33 @@ else
 fi
 
 # For pvc of all namespaces
-echo "collecting dump of oc get pvc all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get pvc all namespaces"
 { oc get pvc --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/pvc_all_namespaces"
-{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect pvc --all-namespaces --"${SINCE_TIME}"; } >>"${BASE_COLLECTION_PATH}/gather-debug.log" 2>&1
+{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect pvc --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 
 # For volumesnapshot of all namespaces
-echo "collecting dump of oc get volumesnapshot all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get volumesnapshot all namespaces"
 { oc get volumesnapshot --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_volumesnapshot_all_namespaces"
 { oc describe volumesnapshot --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_volumesnapshot_all_namespaces"
-{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect volumesnapshot --all-namespaces --"${SINCE_TIME}"; } >>"${BASE_COLLECTION_PATH}/gather-debug.log" 2>&1
+{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect volumesnapshot --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 
 # For obc of all namespaces
-echo "collecting dump of oc get obc all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get obc all namespaces"
 { oc get obc --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/obc_all_namespaces"
-{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect obc --all-namespaces --"${SINCE_TIME}"; } >>"${BASE_COLLECTION_PATH}/gather-debug.log" 2>&1
+{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect obc --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 
 # For VolumeReplication of all namespaces
-echo "collecting dump of oc get volumereplication all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get volumereplication all namespaces"
 { oc get volumereplication --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/vr_all_namespaces"
-{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect volumereplication --all-namespaces --"${SINCE_TIME}"; } >>"${BASE_COLLECTION_PATH}/gather-debug.log" 2>&1
+{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect volumereplication --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 
 # For VolumeReplicationGroups of all namespaces
-echo "collecting dump of oc get volumereplicationgroups all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get volumereplicationgroups all namespaces"
 { oc get volumereplicationgroups --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/vrg_all_namespaces"
-{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect vrg --all-namespaces --"${SINCE_TIME}"; } >>"${BASE_COLLECTION_PATH}/gather-debug.log" 2>&1
+{ oc adm --dest-dir="${BASE_COLLECTION_PATH}/namespaces/all/" inspect vrg --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 
 # Collect details of storageclassclaim of all namespaces for managed services
-echo "collecting dump of oc get storageclassclaim all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get storageclassclaim all namespaces"
 if [ "$(oc get storageclassclaim --no-headers -A | awk '{print $2}')" != "" ]; then
      { oc get storageclassclaim --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_storageclassclaim_all_ns"
      { oc describe storageclassclaim --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_storageclassclaim_all_ns"
@@ -188,28 +191,28 @@ if [ "$(oc get storageclassclaim --no-headers -A | awk '{print $2}')" != "" ]; t
 fi
 
 # Collect csi-addons object details of all namespaces
-echo "collecting dump of oc get csiaddonsnode all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get csiaddonsnode all namespaces"
 if [ "$(oc get csiaddonsnode --no-headers -A | awk '{print $2}')" != "" ]; then
      { oc get csiaddonsnode --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_csiaddonsnode_all_ns"
      { oc describe csiaddonsnode --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_csiaddonsnode_all_ns"
      { oc get csiaddonsnode -oyaml --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_csiaddonsnode_all_ns"
 fi
 
-echo "collecting dump of oc get reclaimspacejob all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get reclaimspacejob all namespaces"
 if [ "$(oc get reclaimspacejob --no-headers -A | awk '{print $1}')" != "" ]; then
      { oc get reclaimspacejob --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_reclaimspacejob_all_ns"
      { oc describe reclaimspacejob --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_reclaimspacejob_all_ns"
      { oc get reclaimspacejob -oyaml --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_reclaimspacejob_all_ns"
 fi
 
-echo "collecting dump of oc get reclaimspacecronjobs all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get reclaimspacecronjobs all namespaces"
 if [ "$(oc get reclaimspacejob --no-headers -A | awk '{print $1}')" != "" ]; then
      { oc get reclaimspacecronjobs --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_reclaimspacecronjobs_all_ns"
      { oc describe reclaimspacecronjobs --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_reclaimspacecronjobs_all_ns"
      { oc get reclaimspacecronjobs -oyaml --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_reclaimspacecronjobs_all_ns"
 fi
 
-echo "collecting dump of oc get networkfence all namespaces" | tee -a "${BASE_COLLECTION_PATH}/gather-debug.log"
+dbglog "collecting dump of oc get networkfence all namespaces"
 if [ "$(oc get networkfence --no-headers -A | awk '{print $1}')" != "" ]; then
      { oc get networkfence --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_networkfence_all_ns"
      { oc describe networkfence --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_networkfence_all_ns"
