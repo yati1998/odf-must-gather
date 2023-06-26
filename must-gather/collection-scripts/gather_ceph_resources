@@ -13,6 +13,7 @@ if [ "${BASE_COLLECTION_PATH}" = "" ]; then
     BASE_COLLECTION_PATH=$(pwd)
 fi
 
+CEPH_GATHER_DBGLOG="${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
 CEPH_COLLECTION_PATH="${BASE_COLLECTION_PATH}/ceph"
 
 # Ceph resources
@@ -115,7 +116,7 @@ for ns in $namespaces; do
 
         # Collecting output of ceph commands
         for ((i = 0; i < ${#ceph_commands[@]}; i++)); do
-            printf "collecting command output for: %s\n" "${ceph_commands[$i]}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+            printf "collecting command output for: %s\n" "${ceph_commands[$i]}" | tee -a "${CEPH_GATHER_DBGLOG}"
             COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/${ceph_commands[$i]// /_}
             JSON_COMMAND_OUTPUT_FILE=${COMMAND_JSON_OUTPUT_DIR}/${ceph_commands[$i]// /_}_--format_json-pretty
             { timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "${ceph_commands[$i]} --connect-timeout=15" >>"${COMMAND_OUTPUT_FILE}"; } >>"${COMMAND_ERR_OUTPUT_DIR}"/gather-"${ceph_commands[$i]}"-debug.log 2>&1 &
@@ -126,7 +127,7 @@ for ns in $namespaces; do
             # CRI-O have a limitation to upper limit to number of PIDs, so we found that when `ps aux | wc -l` exceeds 115 the resource cannot be collected
             # hence to keep a buffer, we are waiting for 2 seconds until we have PIDs available, https://access.redhat.com/solutions/5597061
             while [ "$(ps aux | wc -l)" -gt 100 ]; do
-                printf "waiting for PIDs to be empty before proceeding \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+                printf "waiting for PIDs to be empty before proceeding \n" | tee -a "${CEPH_GATHER_DBGLOG}"
                 sleep 2
             done
         done
@@ -136,13 +137,13 @@ for ns in $namespaces; do
         done
 
         # Collecting output for ceph subvolume output
-        printf "collecting output for cephFS filesystem\n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "collecting output for cephFS filesystem\n" | tee -a "${CEPH_GATHER_DBGLOG}"
         # Inspecting CephFS filesystems
         filesystems=$(timeout 60 oc get cephfilesystems.ceph.rook.io -n "${ns}" -o jsonpath="{range .items[*]}{@.metadata.name}{'\n'}{end}")
 
         for fs in $filesystems; do
             ceph_command="ceph fs subvolumegroup ls ${fs}"
-            printf "collecting command output for: %s\n" "${ceph_command}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+            printf "collecting command output for: %s\n" "${ceph_command}" | tee -a "${CEPH_GATHER_DBGLOG}"
             COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/${ceph_command// /_}
             JSON_COMMAND_OUTPUT_FILE=${COMMAND_JSON_OUTPUT_DIR}/${ceph_command// /_}_--format_json-pretty
             { timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "${ceph_command} --connect-timeout=15" >>"${COMMAND_OUTPUT_FILE}"; } >>"${COMMAND_ERR_OUTPUT_DIR}"/gather-"${ceph_command}"-debug.log 2>&1 &
@@ -152,7 +153,7 @@ for ns in $namespaces; do
             subvolgrp_name=$(timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "${ceph_command}" | awk -F\" '{print $4}')
             for svg in $subvolgrp_name; do
                 subvolume_command="ceph fs subvolume ls ${fs} ${svg}"
-                printf "collecting command output for: %s\n" "${subvolume_command}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+                printf "collecting command output for: %s\n" "${subvolume_command}" | tee -a "${CEPH_GATHER_DBGLOG}"
                 COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/${subvolume_command// /_}
                 JSON_COMMAND_OUTPUT_FILE=${COMMAND_JSON_OUTPUT_DIR}/${subvolume_command// /_}_--format_json-pretty
                 { timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "${subvolume_command} --connect-timeout=15" >>"${COMMAND_OUTPUT_FILE}"; } >>"${COMMAND_ERR_OUTPUT_DIR}"/gather-"${subvolume_command}"-debug.log 2>&1 &
@@ -164,7 +165,7 @@ for ns in $namespaces; do
 
         # Collecting output of rados commands
         for ((i = 0; i < ${#rados_commands[@]}; i++)); do
-            printf "collecting command output for: %s\n" "${rados_commands[$i]}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+            printf "collecting command output for: %s\n" "${rados_commands[$i]}" | tee -a "${CEPH_GATHER_DBGLOG}"
             COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/${rados_commands[$i]// /_}
             { timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "${rados_commands[$i]} " >>"${COMMAND_OUTPUT_FILE}"; } >>"${COMMAND_ERR_OUTPUT_DIR}"/gather-"${rados_commands[$i]}"-debug.log 2>&1 &
             pids_ceph+=($!)
@@ -173,7 +174,7 @@ for ns in $namespaces; do
         # Collecting rados object information for CephFS PVs and snapshots
         COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/rados_cephfs_objects
         # List filesystem and Get the metadata pool name of the filesystem
-        printf "Collecting metadata pool name of the filesystem \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "Collecting metadata pool name of the filesystem \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         mdpools=$(timeout 60 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "ceph fs ls --format=json | jq '.[] | .metadata_pool'")
         for mdpool in $mdpools; do
             { printf "Name of the metadata pool: %s\n" "${mdpool}" >>"${COMMAND_OUTPUT_FILE}"; }
@@ -236,7 +237,7 @@ for ns in $namespaces; do
         done
 
         # collecting trash list for ceph rbd
-        printf "collecting trash list for ceph rbd \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "collecting trash list for ceph rbd \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         # Inspecting ceph block pools for ceph rbd
         blockpools=$(timeout 60 oc get cephblockpools.ceph.rook.io -n "${ns}" -o jsonpath="{range .items[*]}{@.metadata.name}{'\n'}{end}")
         for bp in $blockpools; do
@@ -245,7 +246,7 @@ for ns in $namespaces; do
         done
 
         # Collecting snapshot info for ceph rbd volumes
-        printf "collecting snapshot info for ceph rbd volumes \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "collecting snapshot info for ceph rbd volumes \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/rbd_vol_and_snap_info
         # Inspecting ceph block pools for ceph rbd
         blockpools=$(timeout 60 oc get cephblockpools.ceph.rook.io -n "${ns}" -o jsonpath="{range .items[*]}{@.metadata.name}{'\n'}{end}")
@@ -254,7 +255,7 @@ for ns in $namespaces; do
             images=$(timeout 60 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd ls -p $bp")
             pids_rbd=()
             for image in $images; do
-                printf "collecting vol and snapshot info for %s\n" "${image}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+                printf "collecting vol and snapshot info for %s\n" "${image}" | tee -a "${CEPH_GATHER_DBGLOG}"
                 {
                     printf "Collecting image info for: %s/%s\n" "${bp}" "${image}"
                     timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd info $image --pool $bp" 2>>"${COMMAND_ERR_OUTPUT_DIR}"/gather-rbd-image-"${image}"-debug.log
@@ -276,13 +277,13 @@ for ns in $namespaces; do
         # CRI-O have a limitation to upper limit to number of PIDs, so we found that when `ps aux | wc -l` exceeds 115 the resource cannot be collected
         # hence to keep a buffer, we are waiting for 2 seconds until we have PIDs available, https://access.redhat.com/solutions/5597061
         while [ "$(ps aux | wc -l)" -gt 100 ]; do
-            printf "waiting for PIDs to be empty before proceeding \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+            printf "waiting for PIDs to be empty before proceeding \n" | tee -a "${CEPH_GATHER_DBGLOG}"
             sleep 2
         done
         # Collecting rbd mirroring info for ceph rbd volumes
-        printf "collecting rbd mirroring info for ceph rbd volumes \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "collecting rbd mirroring info for ceph rbd volumes \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         # Checking snapshot schedule status and list
-        printf "collecting snapshot schedule status and list \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "collecting snapshot schedule status and list \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         { timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd mirror snapshot schedule status --format=json --pretty-format" >>"${COMMAND_OUTPUT_DIR}"/rbd_mirror_snapshot_schedule_status; } >>"${COMMAND_ERR_OUTPUT_DIR}"/gather-rbd-mirror-snap-schedule-status-debug.log 2>&1 &
         pids_ceph+=($!)
         { timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd mirror snapshot schedule ls --recursive --format=json --pretty-format" >>"${COMMAND_OUTPUT_DIR}"/rbd_mirror_snapshot_schedule_ls; } >>"${COMMAND_ERR_OUTPUT_DIR}"/gather-rbd-mirror-snap-schedule-list-debug.log 2>&1 &
@@ -294,7 +295,7 @@ for ns in $namespaces; do
             isEnabled=$(timeout 60 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd mirror pool info $bp --format=json | jq --raw-output '.mode'")
             if [ "${isEnabled}" != "disabled" ]; then
                 pids_rbd=()
-                printf "Mirroring is enabled on: %s\n" "${bp}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+                printf "Mirroring is enabled on: %s\n" "${bp}" | tee -a "${CEPH_GATHER_DBGLOG}"
                 {
                     printf "Collecting mirror pool status for: %s\n" "${bp}"
                     timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd mirror pool status --verbose $bp --format=json --pretty-format" 2>>"${COMMAND_ERR_OUTPUT_DIR}"/gather-rbd-mirror-pool-status-"${bp}"-debug.log
@@ -308,7 +309,7 @@ for ns in $namespaces; do
                 printf "Collecting mirror image status for images in: %s\n" "${bp}" >>"${COMMAND_OUTPUT_DIR}"/rbd_mirror_image_status
                 images=$(timeout 60 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd ls -p $bp")
                 for image in $images; do
-                    printf "Printing information for image: %s\n" "${image}" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+                    printf "Printing information for image: %s\n" "${image}" | tee -a "${CEPH_GATHER_DBGLOG}"
                     {
                         printf "Collecting mirror image status for: %s/%s\n" "${bp}" "${image}"
                         timeout 120 oc -n "${ns}" exec "${HOSTNAME}"-helper -- bash -c "rbd mirror image status $bp/$image --format=json --pretty-format" 2>>"${COMMAND_ERR_OUTPUT_DIR}"/gather-rbd-mirror-image-status-"${bp}"-"${image}"-debug.log
@@ -330,7 +331,7 @@ for ns in $namespaces; do
         done
 
         # Collecting snapshot information for ceph subvolumes
-        printf "collecting snapshot info for cephFS subvolumes \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "collecting snapshot info for cephFS subvolumes \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         COMMAND_OUTPUT_FILE=${COMMAND_OUTPUT_DIR}/cephfs_subvol_and_snap_info
 
         for fs in $filesystems; do
@@ -355,13 +356,13 @@ for ns in $namespaces; do
                 done
             done
         done
-        printf "waiting for pids to finish \n" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        printf "waiting for pids to finish \n" | tee -a "${CEPH_GATHER_DBGLOG}"
         wait "${pids_ceph[@]}"
     }
     if [ "$(oc get pods --no-headers -n "${ns}" -l must-gather-helper-pod='' | awk '{print $2}')" == "1/1" ]; then
         ceph_collection
     else
-        echo "skipping the ceph collection" | tee -a "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
+        echo "skipping the ceph collection" | tee -a "${CEPH_GATHER_DBGLOG}"
     fi
     # Collecting output of ceph volume commands
     for ((i = 0; i < ${#ceph_volume_commands[@]}; i++)); do
@@ -449,5 +450,5 @@ CMDS
     echo "ceph core dump collection completed" | tee -a "${BASE_COLLECTION_PATH}"/gather-debug.log
 done
 
-cat "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
-rm -rf "${BASE_COLLECTION_PATH}"/gather-ceph-debug.log >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
+cat "${CEPH_GATHER_DBGLOG}" >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
+rm -rf "${CEPH_GATHER_DBGLOG}" >>"${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
