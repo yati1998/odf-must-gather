@@ -6,6 +6,9 @@ BASE_COLLECTION_PATH=$1
 # Expect time option as an argument
 SINCE_TIME=$2
 
+# Source the utils
+. utils.sh
+
 # Use PWD as base path if no argument is passed
 if [ "${BASE_COLLECTION_PATH}" = "" ]; then
     BASE_COLLECTION_PATH=$(pwd)
@@ -20,6 +23,6 @@ common_ceph_resources+=(cephobjectstoreusers)
 common_ceph_resources+=(cephclusters)
 
 for resource in "${common_ceph_resources[@]}"; do
-    echo "collecting dump ${resource}" | tee -a  "${BASE_COLLECTION_PATH}"/gather-debug.log
-    { oc adm --dest-dir="${CEPH_COLLECTION_PATH}" inspect "${resource}" --all-namespaces --"${SINCE_TIME}"; } >> "${BASE_COLLECTION_PATH}"/gather-debug.log 2>&1
+    dbglog "collecting dump ${resource}"
+    { oc adm --dest-dir="${CEPH_COLLECTION_PATH}" inspect "${resource}" --all-namespaces --"${SINCE_TIME}" 2>&1; } | dbglog
 done
