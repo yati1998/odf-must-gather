@@ -81,7 +81,8 @@ changes contained in the pull request.
 
 All commit messages must contain a sign-off indicating that the contributor
 asserts that they have the legal right to make the contribution and agrees
-that the contribution will be a matter of public record.
+that the contribution will be a matter of public record. See [DCO](./DCO) for
+legal details.
 
 ```
 A description of my change
