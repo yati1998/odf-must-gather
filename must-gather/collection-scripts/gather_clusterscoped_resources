@@ -10,9 +10,6 @@ fi
 # Expect time option as an argument
 SINCE_TIME=$2
 
-# Source the utils
-. utils.sh
-
 # Command List
 commands_get=()
 

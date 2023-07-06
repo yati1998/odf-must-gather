@@ -4,7 +4,10 @@
 # Please Note:
 # While using bash variables inside the functions defined here,
 # ensure that the variable has been defined before,
-# you call the realted helper function.
+# you call the related helper function.
+#
+# Also, to prevent sourcing the file everywhere, please export the functions
+# you define here using `export -f <function_name>`
 #
 
 dbglog() {
@@ -28,3 +31,7 @@ dbglogf() {
 
     echo -e "${msg}" | tee -a "${1}"
 }
+
+# Export the functions so that the file needs to be sourced only once
+export -f dbglog
+export -f dbglogf

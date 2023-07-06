@@ -6,9 +6,6 @@ BASE_COLLECTION_PATH=$1
 # Expect time option as an argument
 SINCE_TIME=$2
 
-# Source the utils
-. utils.sh
-
 gather_common_ceph_resources "${BASE_COLLECTION_PATH}" "${SINCE_TIME}"
 
 # Use PWD as base path if no argument is passed
