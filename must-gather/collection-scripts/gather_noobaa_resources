@@ -21,6 +21,7 @@ noobaa_resources=()
 
 noobaa_resources+=(noobaa)
 noobaa_resources+=(backingstore)
+noobaa_resources+=(namespacestore)
 noobaa_resources+=(bucketclass)
 
 noobaa_cli=()

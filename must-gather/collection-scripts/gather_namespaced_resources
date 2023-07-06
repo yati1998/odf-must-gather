@@ -187,6 +187,14 @@ if [ "$(oc get storageclassclaim --no-headers -A | awk '{print $2}')" != "" ]; t
      { oc get storageclassclaim -oyaml --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_storageclassclaim_all_ns"
 fi
 
+# Collect details of managedfusionoffering of all namespaces for managed services
+echo "collecting dump of oc get managedfusionoffering all namespaces" | tee -a  "${BASE_COLLECTION_PATH}/gather-debug.log"
+if [ "$(oc get managedfusionoffering --no-headers -A | awk '{print $1}')" != "" ] ; then
+     { oc get managedfusionoffering --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/get_managedfusionoffering_all_ns"
+     { oc describe managedfusionoffering --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/desc_managedfusionoffering_all_ns"
+     { oc get managedfusionoffering -oyaml --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_managedfusionoffering_all_ns"
+fi
+
 # Collect csi-addons object details of all namespaces
 dbglog "collecting dump of oc get csiaddonsnode all namespaces"
 if [ "$(oc get csiaddonsnode --no-headers -A | awk '{print $2}')" != "" ]; then
@@ -214,4 +222,10 @@ if [ "$(oc get networkfence --no-headers -A | awk '{print $1}')" != "" ]; then
      { oc get networkfence --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_networkfence_all_ns"
      { oc describe networkfence --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/desc_networkfence_all_ns"
      { oc get networkfence -oyaml --all-namespaces; } >>"${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_networkfence_all_ns"
+fi
+
+echo "collecting network-attachment-definitions of oc get network-attachment-definitions all namespaces" | tee -a  "${BASE_COLLECTION_PATH}/gather-debug.log"
+if [ "$(oc get network-attachment-definitions --no-headers -A | awk '{print $1}')" != "" ] ; then
+     { oc get network-attachment-definitions -oyaml --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/get_yaml_net_attach_def_all_ns"
+     { oc describe network-attachment-definitions --all-namespaces; } >> "${BASE_COLLECTION_PATH}/namespaces/all/desc_net_attach_def_all_ns"
 fi
