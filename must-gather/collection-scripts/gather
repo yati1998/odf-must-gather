@@ -6,7 +6,7 @@ mkdir -p ${BASE_COLLECTION_PATH}
 SINCE_TIME=$1
 
 # Source the utils
-# shellcheck source=utils.sh
+# shellcheck disable=SC1091
 . utils.sh
 
 # timestamp for starting of the script
