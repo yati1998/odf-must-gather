@@ -7,7 +7,7 @@ BASE_COLLECTION_PATH=$1
 SINCE_TIME=$2
 
 # Use PWD as base path if no argument is passed
-if [ -z"${BASE_COLLECTION_PATH}" ]; then
+if [ -z "${BASE_COLLECTION_PATH}" ]; then
     BASE_COLLECTION_PATH=$(pwd)
 fi
 
