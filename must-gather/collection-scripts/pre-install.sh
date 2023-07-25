@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Expect base collection path as an argument
 # shellcheck disable=SC2034
