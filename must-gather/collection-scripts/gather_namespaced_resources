@@ -3,9 +3,6 @@
 # If it is not defined, use PWD instead
 BASE_COLLECTION_PATH=${BASE_COLLECTION_PATH:-"$(pwd)"}
 
-# Expect time option as an argument
-SINCE_TIME=$2
-
 # Make a global variable for namespace
 INSTALL_NAMESPACES=$(oc get storagecluster -A --no-headers | awk '{print $1}')
 PRODUCT_NAMESPACE=$(oc get managedFusionOffering -A --no-headers | awk '{print $1}')
