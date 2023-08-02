@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-# Expect base collection path as an argument
+# Expect base collection path as an exported variable
+# If it is not defined, use PWD instead
 # shellcheck disable=SC2034
-BASE_COLLECTION_PATH="${1}"
+BASE_COLLECTION_PATH=${BASE_COLLECTION_PATH:-"$(pwd)"}
 
 ns=$(oc get deploy --all-namespaces -o go-template --template='{{range .items}}{{if .metadata.labels}}{{printf "%s %v" .metadata.namespace (index .metadata.labels "olm.owner")}} {{printf "\n"}}{{end}}{{end}}' | grep ocs-operator | awk '{print $1}' | uniq)
 
