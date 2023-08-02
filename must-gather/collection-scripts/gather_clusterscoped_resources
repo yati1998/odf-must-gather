@@ -1,11 +1,7 @@
 #!/bin/bash
-# Expect base collection path as an argument
-BASE_COLLECTION_PATH=$1
-
-# Use PWD as base path if no argument is passed
-if [ "${BASE_COLLECTION_PATH}" = "" ]; then
-    BASE_COLLECTION_PATH=$(pwd)
-fi
+# Expect base collection path as an exported variable
+# If it is not defined, use PWD instead
+BASE_COLLECTION_PATH=${BASE_COLLECTION_PATH:-"$(pwd)"}
 
 # Expect time option as an argument
 SINCE_TIME=$2
