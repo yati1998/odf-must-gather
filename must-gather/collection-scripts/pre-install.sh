@@ -56,7 +56,7 @@ check_for_debug_pod() {
     # sleep for 60 seconds giving time for debug pod to get created
     sleep 60
     oc wait -n "${ns}" --for=condition=Ready pod/"$debug_pod_name" --timeout=200s
-    if [ "$(oc get pods -n "${ns}" | grep "${node//./}-debug" | awk '{print $2}')" == "1/1" ]; then
+    if [ "$(oc get pods -n "${ns}" | grep "${node//./}-debug" | awk '{print $2}')" = "1/1" ]; then
         oc label -n "${ns}" pod "$debug_pod_name" "${node//./}"-debug='ready'
     fi
 }
