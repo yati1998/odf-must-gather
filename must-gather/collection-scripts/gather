@@ -27,7 +27,7 @@ storageClusterPresent=$(oc get storagecluster -n "${namespace}" -o go-template='
 externalStorageClusterPresent=$(oc get storagecluster -n "${namespace}" -o go-template='{{range .items}}{{.spec.externalStorage.enable}}{{"\n"}}{{end}}')
 reconcileStrategy=$(oc get storagecluster -n "${namespace}" -o go-template='{{range .items}}{{.spec.multiCloudGateway.reconcileStrategy}}{{"\n"}}{{end}}')
 
-if [ "${externalStorageClusterPresent}" == true ]; then
+if [ "${externalStorageClusterPresent}" = "true" ]; then
     dbglog "Collecting limited ceph logs since external cluster is present"
     gather_common_ceph_resources "${BASE_COLLECTION_PATH}"
 elif [ -z "${storageClusterPresent}" ]; then

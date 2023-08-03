@@ -5,7 +5,6 @@
 BASE_COLLECTION_PATH=${BASE_COLLECTION_PATH:-"$(pwd)"}
 
 gather_common_ceph_resources "${BASE_COLLECTION_PATH}" "${SINCE_TIME}"
-
 CEPH_GATHER_DBGLOG="${BASE_COLLECTION_PATH}"/gather-ceph-debug.log
 CEPH_COLLECTION_PATH="${BASE_COLLECTION_PATH}/ceph"
 
@@ -354,7 +353,7 @@ for ns in $namespaces; do
         dbglogf "${CEPH_GATHER_DBGLOG}" "waiting for pids to finish"
         wait "${pids_ceph[@]}"
     }
-    if [ "$(oc get pods --no-headers -n "${ns}" -l must-gather-helper-pod='' | awk '{print $2}')" == "1/1" ]; then
+    if [ "$(oc get pods --no-headers -n "${ns}" -l must-gather-helper-pod='' | awk '{print $2}')" = "1/1" ]; then
         ceph_collection
     else
         dbglogf "${CEPH_GATHER_DBGLOG}" "skipping the ceph collection"

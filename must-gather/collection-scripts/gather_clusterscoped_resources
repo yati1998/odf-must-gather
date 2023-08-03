@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Expect base collection path as an exported variable
 # If it is not defined, use PWD instead
 BASE_COLLECTION_PATH=${BASE_COLLECTION_PATH:-"$(pwd)"}

@@ -30,7 +30,7 @@ deploy() {
     operatorImage=$(oc get pods -l app=rook-ceph-operator -n "${ns}" -o jsonpath="{range .items[*]}{@.spec.containers[0].image}+{end}" | tr "+" "\n" | head -n1)
     if [ -z "${storageClusterPresent}" ]; then
         dbglog "not creating helper pod since storagecluster is not present"
-    elif [ "${operatorImage}" = "" ]; then
+    elif [ -z "${operatorImage}" ]; then
         dbglog "not able to find the rook's operator image. Skipping collection of ceph command output"
     elif [ "${reconcileStrategy}" = "standalone" ]; then
         dbglog "not creating helper pod as this is a MCG only cluster"
@@ -56,7 +56,7 @@ check_for_debug_pod() {
     # sleep for 60 seconds giving time for debug pod to get created
     sleep 60
     oc wait -n "${ns}" --for=condition=Ready pod/"$debug_pod_name" --timeout=200s
-    if [ "$(oc get pods -n "${ns}" | grep "${node//./}-debug" | awk '{print $2}')" == "1/1" ]; then
+    if [ "$(oc get pods -n "${ns}" | grep "${node//./}-debug" | awk '{print $2}')" = "1/1" ]; then
         oc label -n "${ns}" pod "$debug_pod_name" "${node//./}"-debug='ready'
     fi
 }
