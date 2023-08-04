@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Expect base collection path as an exported variable
 # If it is not defined, use PWD instead

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 export BASE_COLLECTION_PATH="must-gather"
 mkdir -p ${BASE_COLLECTION_PATH}
 
