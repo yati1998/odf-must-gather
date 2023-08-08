@@ -4,7 +4,7 @@ export BASE_COLLECTION_PATH="must-gather"
 mkdir -p ${BASE_COLLECTION_PATH}
 
 # Command line argument
-SINCE_TIME=$1
+export SINCE_TIME=$1
 
 # Source the utils
 # shellcheck disable=SC1091
@@ -19,9 +19,9 @@ dbglog "collection started at: ${START_TIME}"
 pre-install.sh ${BASE_COLLECTION_PATH}
 
 # Call other gather scripts
-gather_namespaced_resources ${BASE_COLLECTION_PATH} "${SINCE_TIME}"
-gather_clusterscoped_resources ${BASE_COLLECTION_PATH} "${SINCE_TIME}"
-gather_noobaa_resources ${BASE_COLLECTION_PATH} "${SINCE_TIME}"
+gather_namespaced_resources ${BASE_COLLECTION_PATH}
+gather_clusterscoped_resources ${BASE_COLLECTION_PATH}
+gather_noobaa_resources ${BASE_COLLECTION_PATH}
 
 namespace=$(oc get deploy --all-namespaces -o go-template --template='{{range .items}}{{if .metadata.labels}}{{printf "%s %v" .metadata.namespace (index .metadata.labels "olm.owner")}} {{printf "\n"}}{{end}}{{end}}' | grep ocs-operator | awk '{print $1}' | uniq)
 storageClusterPresent=$(oc get storagecluster -n "${namespace}" -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
@@ -30,14 +30,14 @@ reconcileStrategy=$(oc get storagecluster -n "${namespace}" -o go-template='{{ra
 
 if [ "${externalStorageClusterPresent}" = "true" ]; then
     dbglog "Collecting limited ceph logs since external cluster is present"
-    gather_common_ceph_resources "${BASE_COLLECTION_PATH}" "${SINCE_TIME}"
+    gather_common_ceph_resources "${BASE_COLLECTION_PATH}"
 elif [ -z "${storageClusterPresent}" ]; then
     dbglog "Skipping ceph collection as Storage Cluster is not present"
 elif [ "${reconcileStrategy}" = "standalone" ]; then
     dbglog "Skipping ceph collection as this is a MCG only cluster"
 else
     dbglog "Collecting entire ceph logs"
-    gather_ceph_resources ${BASE_COLLECTION_PATH} "${SINCE_TIME}"
+    gather_ceph_resources ${BASE_COLLECTION_PATH}
 fi
 
 # Call post-uninstall.sh
