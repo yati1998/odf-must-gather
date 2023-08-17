@@ -382,6 +382,8 @@ for ns in $namespaces; do
     ceph_daemon_log_collection() {
         dbglog "collecting Ceph daemon logs from node ${node}"
         oc rsync -n "${ns}" "$(oc get pods -n "${ns}" --no-headers | grep "${node//./}-debug" | awk '{print $1}')":/host/var/lib/rook/"${ns}"/log "${CEPH_DAEMON_LOG_OUTPUT_DIR}"
+        oc rsync -n "${ns}" "$(oc get pods -n "${ns}" --no-headers | grep "${node//./}-debug" | awk '{print $1}')":/host/sys/kernel/debug/ceph "${LIBCEPH_OUTPUT_DIR}"
+        oc rsync -n "${ns}" "$(oc get pods -n "${ns}" --no-headers | grep "${node//./}-debug" | awk '{print $1}')":/host/sys/bus/rbd/devices "${RBD_OUTPUT_DIR}"
     }
 
     crash_core_collection() {
@@ -411,6 +413,8 @@ CMDS
     for node in ${nodes}; do
         dbglog "collecting crash, journal and volume logs from node ${node}"
         CRASH_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/crash_${node}
+        LIBCEPH_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/libceph_${node}
+        RBD_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/rbd_${node}
         CEPH_DAEMON_LOG_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/ceph_daemon_log_${node}
         JOURNAL_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/journal_${node}
         KERNEL_OUTPUT_DIR=${CEPH_COLLECTION_PATH}/kernel_${node}
@@ -420,6 +424,8 @@ CMDS
         mkdir -p "${JOURNAL_OUTPUT_DIR}"
         mkdir -p "${KERNEL_OUTPUT_DIR}"
         mkdir -p "${COREDUMP_OUTPUT_DIR}"
+        mkdir -p "${LIBCEPH_OUTPUT_DIR}"
+        mkdir -p "${RBD_OUTPUT_DIR}"
         ceph_daemon_log_collection &
         pids_log+=($!)
         crash_core_collection &
