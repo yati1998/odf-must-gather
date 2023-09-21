@@ -4,8 +4,6 @@
 # If it is not defined, use PWD instead
 BASE_COLLECTION_PATH=${BASE_COLLECTION_PATH:-"$(pwd)"}
 
-# Expect time option as an argument
-SINCE_TIME=$2
 CEPH_COLLECTION_PATH="${BASE_COLLECTION_PATH}/ceph"
 
 # common Ceph resources
