@@ -12,6 +12,9 @@ RUN mkdir -p /templates
 COPY --from=builder /go/src/github.com/red-hat-storage/odf-must-gather/collection-scripts/* /usr/bin/
 COPY --from=builder /go/src/github.com/red-hat-storage/odf-must-gather/templates/* /templates
 
-RUN yum install --setopt=tsflags=nodocs -y jq && yum clean all && rm -rf /var/cache/yum/*
+# We do not need it as of now
+# jq is not preinstalled on openshift/origin-cli either
+# Removing this step makes local development easier.
+# RUN yum install --setopt=tsflags=nodocs -y jq && yum clean all && rm -rf /var/cache/yum/*
 
 ENTRYPOINT /usr/bin/gather
