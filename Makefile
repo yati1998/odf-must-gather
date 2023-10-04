@@ -1,18 +1,20 @@
-IMAGE_REGISTRY ?= "quay.io"
-REGISTRY_NAMESPACE ?= "ocs-dev"
-IMAGE_TAG ?= "latest"
-MUST_GATHER_IMAGE_NAME ?= "ocs-must-gather"
+all: images
+.PHONY: all
 
-MUST_GATHER_IMAGE_NAME ?= $(IMAGE_REGISTRY)/$(REGISTRY_NAMESPACE)/$(MUST_GATHER_IMAGE_NAME):$(IMAGE_TAG)
+# Include the library makefile
+include $(addprefix ./vendor/github.com/openshift/build-machinery-go/make/, \
+	golang.mk \
+	targets/openshift/images.mk \
+)
 
-OCS_MUST_GATHER_DIR ?= "${OCS_MUST_GATHER_DIR:-ocs-must-gather}"
-OCP_MUST_GATHER_DIR ?= "${OCP_MUST_GATHER_DIR:-ocp-must-gather}"
+IMAGE_REGISTRY :=registry.svc.ci.openshift.org
 
-PLATFORM ?= "docker"
+# This will call a macro called "build-image" which will generate image specific targets based on the parameters:
+# $0 - macro name
+# $1 - target name
+# $2 - image ref
+# $3 - Dockerfile path
+# $4 - context directory for image build
+$(call build-image,odf-must-gather,$(IMAGE_REGISTRY)/ocp/4.14:odf-must-gather, ./Dockerfile,.)
 
-.PHONY: \
-	odf-must-gather 
-	
-odf-must-gather:
-	@echo "Building the ocs-must-gather image"
-	${PLATFORM} build -f must-gather/Dockerfile -t ${MUST_GATHER_IMAGE_NAME} must-gather/
+$(call verify-golang-versions,Dockerfile)
