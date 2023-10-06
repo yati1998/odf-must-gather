@@ -6,7 +6,7 @@ that expands its capabilities to gather Openshift Container Storage for informat
 
 ### Usage
 ```sh
-oc adm must-gather --image=quay.io/rhceph-dev/odf4-odf-must-gather-rhel9:latest-4.13
+oc adm must-gather --image=registry.redhat.io/odf4/odf-must-gather-rhel9:v4.13
 ```
 
 The command above will create a local directory with a dump of the ocs state.
