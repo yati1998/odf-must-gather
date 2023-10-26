@@ -46,31 +46,17 @@ run `oc adm must-gather` (without passing a custom image). Run `oc adm must-gath
 ### Building locally for testing
 You need to be autheticated against the OpenShift registry CI, registry.ci.openshift.org in order to be able to pull the images in the `Dockerfile`.
 
-Before proceeding make sure you have `oc` (OpenShift cli) and `jq` (optional) installed.
+Before proceeding make sure you have `oc` (OpenShift cli) installed.
 
 Follow these steps to authenticate:
 
 - Navigate to the OpenShift console for `app.ci` cluster located [here](https://console-openshift-console.apps.ci.l2s4.p1.openshiftapps.com/).
 - Login using SSO
 - Go to your profile name in the top right and select "Copy login command".
-- Login to the cluster using: `oc login --token=<AUTH_TOKEN> --server=<SERVER_URL>`
-- Login to the registry using: `oc registry login --registry registry.ci.openshift.org`
-  
-You should now be successfully authenticated. You can verify by running:
+- Copy the displayed TOKEN
+- Run `ODF_MG_TOKEN=YOUR_TOKEN_HERE make local`. 
 
-```sh
-cat ~/.docker/config.json | jq '.auths["registry.ci.openshift.org"]'
-```
-
-You should get an output like:
-
-```json
-{
-  "auth": "<AUTH_TOKEN>"
-}
-```
-
-Now you can build normally like: `docker build . -t <TAG> --platform=linux/amd64`
+See [here](https://github.com/red-hat-storage/odf-must-gather/pull/76) for more options on building locally.
 
 ### How to Contribute
 
