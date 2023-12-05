@@ -143,21 +143,7 @@ fi
 
 if [ "$ceph" == true ]; then
     echo "Collect ceph pod logs..."
-    namespace=$(oc get deploy --all-namespaces -o go-template --template='{{range .items}}{{if .metadata.labels}}{{printf "%s %v" .metadata.namespace (index .metadata.labels "olm.owner")}} {{printf "\n"}}{{end}}{{end}}' | grep ocs-operator | awk '{print $1}' | uniq)
-    storageClusterPresent=$(oc get storagecluster -n "${namespace}" -o go-template='{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
-    externalStorageClusterPresent=$(oc get storagecluster -n "${namespace}" -o go-template='{{range .items}}{{.spec.externalStorage.enable}}{{"\n"}}{{end}}')
-    reconcileStrategy=$(oc get storagecluster -n "${namespace}" -o go-template='{{range .items}}{{.spec.multiCloudGateway.reconcileStrategy}}{{"\n"}}{{end}}')
-    if [ "${externalStorageClusterPresent}" = "true" ]; then
-        dbglog "Collecting limited ceph logs since external cluster is present"
-        gather_common_ceph_resources "${BASE_COLLECTION_PATH}"
-    elif [ -z "${storageClusterPresent}" ]; then
-        dbglog "Skipping ceph collection as Storage Cluster is not present"
-    elif [ "${reconcileStrategy}" = "standalone" ]; then
-        dbglog "Skipping ceph collection as this is a MCG only cluster"
-    else
-    dbglog "Collecting entire ceph logs"
-    gather_ceph_resources ${BASE_COLLECTION_PATH}
-    fi
+    gather_ceph_pod_logs
 fi
 
 if [ "$cephlogs" == true ]; then
