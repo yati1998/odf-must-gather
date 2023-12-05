@@ -11,6 +11,9 @@ clusterscoped=false
 help=false
 default=true
 
+# Store PIDs of all the subprocesses
+pids=()
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
     -d | --dr)
@@ -128,37 +131,44 @@ fi
 # Process the options
 if [ "$dr" == true ]; then
     echo "Collect DR logs..."
-    gather_dr_resources ${BASE_COLLECTION_PATH}
+    gather_dr_resources ${BASE_COLLECTION_PATH} &
+    pids+=($!)
 fi
 
 if [ "$pc" == true ]; then
     echo "Collect Provider/Consumer logs..."
-    gather_odf_client ${BASE_COLLECTION_PATH}
+    gather_odf_client ${BASE_COLLECTION_PATH} &
+    pids+=($!)
 fi
 
 if [ "$nooba" == true ]; then
     echo "Collect Nooba logs..."
-    gather_noobaa_resources ${BASE_COLLECTION_PATH}
+    gather_noobaa_resources ${BASE_COLLECTION_PATH} &
+    pids+=($!)
 fi
 
 if [ "$ceph" == true ]; then
     echo "Collect ceph pod logs..."
-    gather_ceph_pod_logs
+    gather_ceph_pod_logs &
+    pids+=($!)
 fi
 
 if [ "$cephlogs" == true ]; then
     echo "Collect ceph daemon logs..."
-    gather_ceph_logs ${BASE_COLLECTION_PATH}
+    gather_ceph_logs ${BASE_COLLECTION_PATH} &
+    pids+=($!)
 fi
 
 if [ "$namespaced" == true ]; then
     echo "Collect namespaced logs..."
-    gather_namespaced_resources ${BASE_COLLECTION_PATH}
+    gather_namespaced_resources ${BASE_COLLECTION_PATH} &
+    pids+=($!)
 fi
 
 if [ "$clusterscoped" == true ]; then
     echo "Collect clusterscoped logs..."
-    gather_clusterscoped_resources ${BASE_COLLECTION_PATH}
+    gather_clusterscoped_resources ${BASE_COLLECTION_PATH} &
+    pids+=($!)
 fi
 
 # Preserve the functionality to accept and forward other args
@@ -175,6 +185,12 @@ fi
 if [ "$default" = true ]; then
     echo "Gather will start in default op mode"
     gather_main
+fi
+
+# Check if PID array has any values, if so, wait for them to finish
+if [ ${#pids[@]} -ne 0 ]; then
+    echo "Waiting on subprocesses to finish execution."
+    wait "${pids[@]}"
 fi
 
 # Call post-uninstall.sh
