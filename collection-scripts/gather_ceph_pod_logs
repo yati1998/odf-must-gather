@@ -18,5 +18,5 @@ elif [ "${reconcileStrategy}" = "standalone" ]; then
     dbglog "Skipping ceph collection as this is a MCG only cluster"
 else
     dbglog "Collecting entire ceph logs"
-    gather_ceph_resources ${BASE_COLLECTION_PATH}
+    gather_ceph_resources "${BASE_COLLECTION_PATH}"
 fi
