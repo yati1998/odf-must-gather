@@ -9,16 +9,18 @@ that expands its capabilities to gather Openshift Container Storage for informat
 oc adm must-gather --image=registry.redhat.io/odf4/odf-must-gather-rhel9:v4.13 -- /usr/bin/gather -arg1 -arg2
 ```
 
-List of arguments that can be passed to the above command are:
+**Note**: For the time being the image in the above link is not from the latest upstream code and hence does not support args. This message will be updated along with the link when the image is up to date.
+
+List of arguments that can be passed to the odf-must-gather are:
 ```
-  -d,  --dr                 Collect DR logs
-  -p,  --provider           Collect logs for provider/consumer cluster
-  -n,  --nooba              Collect nooba logs
-  -c,  --ceph               Collect ceph commands and pod logs
-  -cl, --ceph-logs          Collect ceph daemon, kernel, journal logs and crash reports
-  -ns, --namespaced         Collect namespaced resources
-  -cs, --clusterscoped      Collect clusterscoped resources
-  -h,  --help               Print this help message
+-d,  --dr                 Collect DR logs
+-p,  --provider           Collect logs for provider/consumer cluster
+-n,  --nooba              Collect nooba logs
+-c,  --ceph               Collect ceph commands and pod logs
+-cl, --ceph-logs          Collect ceph daemon, kernel, journal logs and crash reports
+-ns, --namespaced         Collect namespaced resources
+-cs, --clusterscoped      Collect clusterscoped resources
+-h,  --help               Print this help message
 ```
 
 ## Description:
@@ -31,19 +33,20 @@ from your cluster. This might take longer on some environments.
 
 Note: Provide each arg separately and do not chain them like:
 ```
-        $ -dpnc          # Wrong
-        $ -d -p -n -c    # Correct
-```
+$ /usr/bin/gather -dpnc          # Wrong
+$ /usr/bin/gather -d -p -n -c    # Correct
 ```
 Examples:
-  $ $0 -d -n --ceph         # Collect DR, nooba and ceph logs only.
-  $ $0 -h                   # Print help
+```
+$ /usr/bin/gather -d -n --ceph         # Collect DR, nooba and ceph logs only.
+$ /usr/bin/gather -h                   # Print help
 ```
 
-The command above will create a local directory with a dump of the odf state.
-Note that this command will only get data related to the odf part of the OpenShift cluster.
+The command above will create a local directory with a dump of the ODF state.
 
-You will get a dump of:
+**Note**: This command will only get data related to the ODF part of the OpenShift cluster.
+
+The dump consists of:
 - The ODF Operator namespaces (and its children objects)
 - All namespaces (and their children objects) that belong to any ODF resources
 - All ODF CRD's definitions
