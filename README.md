@@ -33,13 +33,13 @@ from your cluster. This might take longer on some environments.
 
 Note: Provide each arg separately and do not chain them like:
 ```
-$ oc adm must-gather --image=<image> -- /usr/bin/gather  -dpnc          # Wrong
-$ oc adm must-gather --image=<image> -- /usr/bin/gather -d -p -n -c     # Correct
+$ oc adm must-gather --image=<odf-must-gather-image> -- /usr/bin/gather  -dpnc          # Wrong
+$ oc adm must-gather --image=<odf-must-gather-image> -- /usr/bin/gather -d -p -n -c     # Correct
 ```
 Examples:
 ```
-$ oc adm must-gather --image=<image> -- /usr/bin/gather -d -n --ceph    # Collect DR, nooba and ceph logs only.
-$ oc adm must-gather --image=<image> -- /usr/bin/gather -h              # Print help
+$ oc adm must-gather --image=<odf-must-gather-image> -- /usr/bin/gather -d -n --ceph    # Collect DR, nooba and ceph logs only.
+$ oc adm must-gather --image=<odf-must-gather-image> -- /usr/bin/gather -h              # Print help
 ```
 
 The command above will create a local directory with a dump of the ODF state.
