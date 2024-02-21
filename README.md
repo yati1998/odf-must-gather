@@ -38,8 +38,8 @@ $ oc adm must-gather --image=<image> -- /usr/bin/gather -d -p -n -c     # Correc
 ```
 Examples:
 ```
-$ oc adm must-gather --image=<image> -d -n --ceph      # Collect DR, nooba and ceph logs only.
-$ oc adm must-gather --image=<image> -h                # Print help
+$ oc adm must-gather --image=<image> -- /usr/bin/gather -d -n --ceph    # Collect DR, nooba and ceph logs only.
+$ oc adm must-gather --image=<image> -h              # Print help
 ```
 
 The command above will create a local directory with a dump of the ODF state.
