@@ -108,7 +108,7 @@ Description:
 
 Examples:
   $ oc adm must-gather --image=<image> -- /usr/bin/gather -d -n --ceph    # Collect DR, nooba and ceph logs only.
-  $ oc adm must-gather --image=<image> -h                                 # Print help
+  $ oc adm must-gather --image=<image> -- /usr/bin/gather -h              # Print help
 EOF
 }
 
