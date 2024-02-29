@@ -102,9 +102,9 @@ Description:
   will run in FULL collection mode and will gather all the resources
   from your cluster. This might take longer on some environments.
 
-  Note: Provide each arg separately and do not chain them like:
-        $ oc adm must-gather --image=<odf-must-gather-image> -- $0  -dpnc          # Wrong
-        $ oc adm must-gather --image=<odf-must-gather-image> -- $0 -d -p -n -c     # Correct
+Note: Provide each arg separately and do not chain them like:
+  $ oc adm must-gather --image=<odf-must-gather-image> -- $0  -dpnc          # Wrong
+  $ oc adm must-gather --image=<odf-must-gather-image> -- $0 -d -p -n -c     # Correct
 
 Examples:
   $ oc adm must-gather --image=<odf-must-gather-image> -- $0 -d -n --ceph    # Collect DR, nooba and ceph logs only.
