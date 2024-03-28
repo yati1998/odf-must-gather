@@ -120,9 +120,6 @@ fi
 export BASE_COLLECTION_PATH="must-gather"
 mkdir -p ${BASE_COLLECTION_PATH}
 
-# Command line argument
-export SINCE_TIME=$1
-
 # Source the utils
 # shellcheck disable=SC1091
 . utils.sh
