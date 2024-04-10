@@ -15,6 +15,9 @@ procids+=($!)
 gather_ceph_logs &
 procids+=($!)
 
+gather_ceph_resources &
+procids+=($!)
+
 gather_ceph_pod_logs &
 procids+=($!)
 
