@@ -1,12 +1,12 @@
 # Builder stage
-FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.14 AS builder
+FROM registry.ci.openshift.org/ocp/builder:rhel-8-golang-1.20-openshift-4.16 AS builder
 WORKDIR /go/src/github.com/red-hat-storage/odf-must-gather
 
 COPY . .
 ENV GO_PACKAGE github.com/red-hat-storage/odf-must-gather
 
 # Prod stage
-FROM registry.ci.openshift.org/ocp/4.14:cli
+FROM registry.ci.openshift.org/ocp/4.16:cli
 
 RUN mkdir -p /templates
 COPY --from=builder /go/src/github.com/red-hat-storage/odf-must-gather/collection-scripts/* /usr/bin/
